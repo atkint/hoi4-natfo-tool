@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NationalFocus : FocusContainer
+
+public class NFVariable : NFElement
 {
-    
+    public string Value { get; set; }
 }

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class FocusVariable
+public class NFElement
 {
     public string Name { get; set; }
-    public string Value { get; set; }
+    public string Comments { get; set; }
 }

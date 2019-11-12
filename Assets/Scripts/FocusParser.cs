@@ -10,18 +10,16 @@ public class FocusParser : MonoBehaviour
     StreamReader sr;
     
     public Text textDisplay;
-    int bracketDepth = 0;
     string text;
 
+    
 
-    public NationalFocus NationalFocus;
-
-    void Start()
+    public NFContainer ReadFile(string path)
     {
-        sr = new StreamReader(@"C:\Users\Tim\Desktop\hoi4-natfo-tool\Assets\Example\generic.txt");
+        sr = new StreamReader(path);
         text = cleanText(sr.ReadToEnd());
         sr.Close();
-        readLoop();
+        return readLoop();
     }
 
     string cleanText(string textToClean)
@@ -32,23 +30,17 @@ public class FocusParser : MonoBehaviour
         {
             textLines[i] = cleanCommentsFromLine(textLines[i]);
         }
-        Debug.Log(textLines.Count.ToString("0 lines"));
         return string.Join("\n", textLines);
     }
 
-    public void readLoop ()
+    public NFContainer readLoop ()
     {
         string[] lines = text.Split('\n');
         int characterIndex = 0;
-        List<FocusContainer> containerDepth = new List<FocusContainer>();
+        List<NFContainer> containerDepth = new List<NFContainer>();
 
-        //string focusTreeContents = GetContentsOfBrackets(text.Substring(text.IndexOf("focus_tree")), text.IndexOf("focus_tree"));
-        string focusTreeContents = GetContentsOfBrackets(text, text.IndexOf("focus_tree"));
-        textDisplay.text = focusTreeContents;
-        string debugString = "";
         for (int i = 0; i< lines.Length; i++)//i < 4;i++)//
         {
-            
             var line = lines[i];
             int openBracketCount = line.Count(x => x == '{');
             int closeBracketCount = line.Count(x => x == '}');
@@ -62,27 +54,22 @@ public class FocusParser : MonoBehaviour
                 //Debug.Log(openBracketCount.ToString("0 open brackets")+"\n"+ closeBracketCount.ToString("0 close brackets"));
                 var name = line.Split('=')[0].Trim();
                 var contents = GetContentsOfBrackets(text, characterIndex);
-                var container = new FocusContainer { Name = name, Contents = contents };
+                var container = new NFContainer { Name = name, Contents = contents };
                 if (containerDepth.Count> 0)
                 {
-                    containerDepth.Last().AddContainer(container.Name, container);
+                    containerDepth.Last().AddContainer(container);
                 }
                 containerDepth.Add(container);
             }
             else if (line.Contains("}") && openBracketCount - closeBracketCount != 0)
             {
-                containerDepth.RemoveAt(containerDepth.Count - 1);
-            }
-            try
-            {
-                //Debug.Log(line+"\n"+text.Substring(characterIndex, line.Length+1));
-            }
-            catch
-            {
-                //Debug.Log(line + "\n" + text.Substring(characterIndex, line.Length));
+                // If you have more than one element, remove it. Otherwise keep it so we can return the national focus
+                if (containerDepth.Count > 1)
+                    containerDepth.RemoveAt(containerDepth.Count - 1);
             }
             characterIndex += line.Length+1;
         }
+        return containerDepth.First();
     }
 
     bool isVariable(string line)
