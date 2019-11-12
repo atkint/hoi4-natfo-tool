@@ -17,4 +17,9 @@ public class FocusButton : MonoBehaviour
         GetComponentInChildren<Text>().text = name;
         //Debug.Log(container.Name + "\nX: "+container.X.ToString()+"\nY: "+container.Y.ToString());
     }
+
+    private void OnDestroy()
+    {
+        GetComponentInChildren<Button>().onClick.RemoveAllListeners();
+    }
 }

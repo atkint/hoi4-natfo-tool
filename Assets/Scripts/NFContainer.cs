@@ -27,11 +27,19 @@ public class NFContainer : NFElement
         {
             return int.Parse(((NFVariable)Elements.Find((e => e.Name == "x")))?.Value);
         }
+        set
+        {
+            ((NFVariable)Elements.Find((e => e.Name == "x"))).Value = value.ToString();
+        }
     }
     public int Y {
         get
         {
             return int.Parse(((NFVariable)Elements.Find((e => e.Name == "y")))?.Value);
+        }
+        set
+        {
+            ((NFVariable)Elements.Find((e => e.Name == "x"))).Value = value.ToString();
         }
     }
     public string Contents { get; set; }

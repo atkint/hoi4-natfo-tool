@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NationalFocus : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class NationalFocus : MonoBehaviour
     public GameObject focusButtonPrefab;
     public RectTransform scrollContent;
     public Transform focusTransform;
+    public UIFocusEditor editorPanel;
 
     public Dictionary<string, FocusButton> focusButtons = new Dictionary<string, FocusButton>();
 
@@ -17,9 +19,11 @@ public class NationalFocus : MonoBehaviour
 
     private void Start()
     {
+        editorPanel = FindObjectOfType<UIFocusEditor>();
+
         nationalNFContainer = parser.ReadFile(@"C:\Users\Tim\Desktop\hoi4-natfo-tool\Assets\Example\france.txt");
         GameObjectify(nationalNFContainer);
-        ArrangeFocusButtons();
+        RefreshFocusButtons();
     }
 
     public GameObject GameObjectify(NFContainer container)
@@ -47,6 +51,7 @@ public class NationalFocus : MonoBehaviour
                     fb.container = c;
 
                     focusButtons.Add(c.ID, fb);
+                    fb.GetComponent<Button>().onClick.AddListener(() => FocusSelected(fb));
                 }
             }
             else
@@ -62,7 +67,7 @@ public class NationalFocus : MonoBehaviour
     }
 
     // Focuses have a parent from which their position is offset
-    public void ArrangeFocusButtons()
+    public void RefreshFocusButtons()
     {
         // Diagnostic variables, might be useful if large trees go below 0 x
         float lowestX = 0;
@@ -72,6 +77,7 @@ public class NationalFocus : MonoBehaviour
 
         foreach (FocusButton fb in focusButtons.Values)
         {
+            fb.name = fb.container.Name;
             if (!string.IsNullOrEmpty(fb.container.RelativePositionID))
             {
                 fb.transform.SetParent(focusButtons[fb.container.RelativePositionID].transform,true);
@@ -87,6 +93,14 @@ public class NationalFocus : MonoBehaviour
         }
         scrollContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, highestX+xOffset);
         scrollContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (lowestY - yOffset)* -1);
+
+        
         Debug.Log(string.Format("Lowest\nX: {0} - {1} Y: {2} - {3}", lowestX, highestX, lowestY, highestY));
+    }
+
+    void FocusSelected(FocusButton fb)
+    {
+        editorPanel.gameObject.SetActive(true);
+        editorPanel.SetFocus(fb);
     }
 }
